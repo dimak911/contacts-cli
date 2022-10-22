@@ -5,46 +5,72 @@ const { v4: uuid } = require("uuid");
 const contactsPath = path.resolve("./db/contacts.json");
 
 const getContacts = async () => {
-  return JSON.parse(await fs.readFile(contactsPath, "utf8"));
+  const contactsFromDb = await fs.readFile(contactsPath, "utf8");
+  const parsedContactsFromDb = JSON.parse(contactsFromDb);
+
+  return parsedContactsFromDb;
 };
 
 async function listContacts() {
-  const contacts = await getContacts();
+  try {
+    const contacts = await getContacts();
 
-  console.table(contacts);
+    return contacts;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function getContactById(contactId) {
-  const contacts = await getContacts();
-  const contact = contacts.find((contact) => contact.id === contactId);
-  if (contact) {
-    console.table(contact);
-  } else {
-    console.warn("\x1B[31m No such contact");
+  try {
+    const contacts = await getContacts();
+    const contact = contacts.find((contact) => contact.id === contactId);
+
+    if (!contact) {
+      return null;
+    }
+
+    return contact;
+  } catch (error) {
+    console.error(error);
   }
 }
 
 async function removeContact(contactId) {
-  const contacts = await getContacts();
-  const filteredContacts = contacts.filter(
-    (contact) => contact.id !== contactId
-  );
+  try {
+    const contact = getContactById(contactId);
 
-  await fs.writeFile(contactsPath, JSON.stringify(filteredContacts), "utf8");
+    if (!contact) {
+      return null;
+    }
 
-  console.table(filteredContacts);
+    const contacts = await getContacts();
+    const filteredContacts = contacts.filter(
+      (contact) => contact.id !== contactId
+    );
+
+    await fs.writeFile(contactsPath, JSON.stringify(filteredContacts), "utf8");
+
+    return contact;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function addContact(name, email, phone) {
-  const contacts = await getContacts();
-  const id = uuid();
-  const newContact = { id, name, email, phone };
+  try {
+    const contacts = await getContacts();
+    const id = uuid();
+    const newContact = { id, name, email, phone };
 
-  contacts.push(newContact);
+    contacts.push(newContact);
 
-  await fs.writeFile(contactsPath, JSON.stringify(contacts), "utf8");
+    await fs.writeFile(contactsPath, JSON.stringify(contacts), "utf8");
 
-  console.table(contacts);
+    return newContact;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 module.exports = {

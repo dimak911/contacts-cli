@@ -18,22 +18,30 @@ program.parse(process.argv);
 
 const options = program.opts();
 
-function invokeAction({ action, id, name, email, phone }) {
+async function invokeAction({ action, id, name, email, phone }) {
   switch (action) {
     case "list":
-      listContacts();
+      const contacts = await listContacts();
+
+      console.table(contacts);
       break;
 
     case "get":
-      getContactById(id);
+      const contact = await getContactById(id);
+
+      console.log(contact);
       break;
 
     case "add":
-      addContact(name, email, phone);
+      const newContact = await addContact(name, email, phone);
+
+      console.log(newContact);
       break;
 
     case "remove":
-      removeContact(id);
+      const removedContact = await removeContact(id);
+
+      console.log(removedContact);
       break;
 
     default:
